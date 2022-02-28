@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+      <title>How Old</title>
+      <meta charset="utf-8"/>
+      <meta name="viewport" content="width=device-width"/>
+      <script src="vue.js"></script>
+      <script src="axios.min.js"></script>
+      <link rel="stylesheet" href="style.css"/>
+      <link rel="manifest" href="manifest.json">
+      <meta name="theme-color" content="#FFF"/>
+      <link rel="apple-touch-icon" href="120.png">
+      <link rel="apple-touch-icon" sizes="152x152" href="152.png">
+      <link rel="apple-touch-icon" sizes="180x180" href="180.png">
+      <link rel="apple-touch-icon" sizes="167x167" href="167.png">
+  </head>
+  <body>
+    <div id='myapp'>           
+      <aside v-if="showModal" id="modal--backdrop">
+        <div id="modal--content">
+          <button @click="close()" id="closeButton">X close</button>
+          <input type="hidden" v-model="id"/>
+          <label>
+            <span>Name</span>
+            <input type="text" v-model="name"/>
+          </label>
+          <label>
+            <span>Month</span>
+            <select v-model='month'>
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6">June</option>
+              <option value="7">July</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+          </label>
+          <label>
+            <span>Day</span>
+            <select v-model="day">
+              <option v-for="availableDay in daysForMonth" :value="availableDay">
+              {{availableDay}}
+              </option>
+            </select>
+          </label>
+          <label>
+            <span>Year</span>
+            <select v-model="year">
+              <option value="null">idk</option>
+              <option v-for="availableYear in yearsForYear" :value="availableYear+1920">
+              {{availableYear+1920}}
+              </option>
+            </select>
+          </label>
+          <footer>
+            <button v-if="isNew" type="button" @click='addRecord();'>
+              save
+            </button>
+            <button v-if="!isNew" type="button" @click='updateRecord();'>
+              save
+            </button>
+          </footer>
+          <div v-if="formMessage">{{formMessage}}</div>
+        </div>
+      </aside>
+      <main>
+        <div v-for='(user,index) in users' class="user" v-bind:class="soonClass(daysLeft(user.month, user.day))" @click="edit(user)">
+          <template v-if="daysLeft(user.month, user.day) === 0 && user.ishidden !== 1">
+            Happy Birthday {{user.name}}
+            <div class="candles">
+              <span v-for="digit in candles(upcomingAge(user.month, user.day, user.year))" class="candle">{{digit}}</span>
+            </div>
+          </template>
+          <template v-if="daysLeft(user.month, user.day) !== 0 && user.ishidden !== 1">
+            <span class="name">{{user.name}}</span>
+            <span class="count">
+              {{daysLeft(user.month, user.day)}}
+            </span>
+            <span class="days">
+              days
+            </span>
+            <span class="upcomingAge">            
+              {{upcomingAge(user.month, user.day, user.year)}}              
+            </span>
+          </template>
+        </div>
+      </main>
+      <footer class="table">
+        <button @click="add()" id="addNewButton">add</button>
+      </footer>
+    </div>
+  </body>
+  <script type="text/javascript">
+    var app = new Vue({
+      el: '#myapp',
+      data: {
+        users: "",
+        id: "",
+        name: "",
+        month: "",
+        day: "",
+        year: "",
+        showModal:false,
+        isNew:false,
+        formMessage: "",
+        localTest:false
+      },
+      methods: {
+        allRecords: function(){
+          if (this.localTest){
+            this.users = [{"id":"3","name":"Jace","year":"2008","month":"11","day":"7","ishidden":"0"},{"id":"2","name":"mark","year":"1981","month":"11","day":"13","ishidden":"0"},{"id":"1","name":"barnum","year":"2011","month":"3","day":"15","ishidden":"0"},{"id":"4","name":"Faith","year":"2018","month":"6","day":"9","ishidden":"0"},{"id":"0","name":"abi","year":"1983","month":"9","day":"23","ishidden":"0"}]
+          } else {
+          axios.post('ajax.php', {
+            request: 1
+          })
+          .then(function (response) {
+            const today = new Date();
+            const dd = String(today.getDate()).padStart(2, '0');
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+
+            const firstHalf = response.data.filter(user => (parseInt(user.month) > parseInt(mm)) || (parseInt(user.month) == parseInt(mm) && parseInt(user.day) >= parseInt(dd)))
+            const secondHalf = response.data.filter(user => (parseInt(user.month) < parseInt(mm)) || (parseInt(user.month) == parseInt(mm) && parseInt(user.day) < parseInt(dd)))
+            app.users = firstHalf.concat(secondHalf);
+
+            // app.users = response.data;
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+          }    
+        },
+        addRecord: function(){
+          if(this.id != '' && this.name != '' && this.month != '' && this.day != ''){
+            axios.post('ajax.php', {
+              request: 2,
+              id: this.id,
+              name: this.name,
+              month: this.month,
+              day: this.day,
+              year: this.year
+            })
+            .then(function (response) {
+
+              // Fetch records
+              this.allRecords();
+
+              // Empty values
+              this.id = '';
+              this.name = '';
+              this.month = '';
+              this.day = '';
+              this.year = '';
+      
+              // alert(response.data);
+              this.formMessage = 'Added!'
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          }else{
+            this.formMessage = 'Everything but year is required';
+          }
+        },
+        updateRecord: function(){
+          const name = this.name;
+          const month = this.month;
+          const day = this.day;
+          const year = this.year;
+          const id = this.id;
+          console.log('update with ', id, name, month, day, year)
+          if(name !='' && month !=''){
+            axios.post('ajax.php', {
+              request: 3,
+              id: id,
+              name: name,
+              month: month,
+              day: day,
+              year: year
+            })
+            .then(function (response) {
+              // alert(response.data);
+              this.formMessage = 'Added!'
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+          }
+        },
+        deleteRecord: function(index,id){
+          axios.post('ajax.php', {
+            request: 4,
+            id: id
+          })
+          .then(function (response) {
+
+            // Remove index from users
+            // app.users.splice(index, 1);
+            // alert(response.data);
+            this.formMessage = 'Deleted!'
+            this.allRecords();
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+        },
+        add: function(){
+          this.id = this.users.length;
+          this.name = "";
+          this.month = "";
+          this.day = "";
+          this.year = "";
+          this.isNew = true;
+          this.showModal = true;
+        },
+        edit: function(user) {
+          this.id = user.id;
+          this.name = user.name;
+          this.month = user.month;
+          this.day = user.day;
+          this.year = user.year;
+          this.isNew = false;
+          this.showModal = true;
+        },
+        close: function(){
+          this.showModal = false;
+          this.formMessage = '';
+        },
+        daysLeft: function(month, day){
+          const today = new Date();
+          yyyy = this.getCompareYear(month, day);
+          
+          const date1 = new Date(month + '/' + day +'/' + yyyy);
+          var difference = date1.getTime() - today.getTime();
+          var days = Math.ceil(difference / (1000 * 3600 * 24));
+          return days;
+        },
+        upcomingAge: function(month, day, year){
+          if (isNaN(year) || parseInt(year) === 0){
+            return "";
+          }
+          yyyy = this.getCompareYear(month, day);
+          const age = yyyy - year;
+          let suffix = 'th';
+          if (age !== 11 && age !== 12 && age !== 13 ){
+            if (age % 10 === 1){
+              suffix = 'st'
+            }
+            if (age % 10 === 2){
+              suffix = 'nd'
+            }
+            if (age % 10 === 3){
+              suffix = 'rd'
+            }
+          }
+          return age + suffix + ' birthday';
+        },
+        getCompareYear(month, day){
+          const today = new Date();
+          const dd = String(today.getDate()).padStart(2, '0');
+          const mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+          let yyyy = today.getFullYear();
+          // check types!
+          if ((parseInt(month) < parseInt(mm)) || (parseInt(month) === parseInt(mm) && parseInt(day) < parseInt(dd))){
+            yyyy += 1
+          }
+          return yyyy;
+        },
+        soonClass(days){
+          if (days === 0){
+            return 'today'
+          }
+          if (days < 14){
+            return 'soon'
+          }
+          return 'later'
+          // { soon: daysLeft(user.month, user.day) < 14, today: daysLeft(user.month, user.day) === 0 }
+        },
+        candles(birthday){
+          let candleArray = [];
+          const onlynumbers = parseInt(birthday).toString();
+          return onlynumbers.split('');
+        }
+      },
+      created: function(){
+        this.allRecords();
+      },
+      computed: {
+        daysForMonth: function () {
+          // `this` points to the vm instance
+          days = 31;
+          if (this.month === 9 ||
+              this.month === 4 ||
+              this.month === 6 ||
+              this.month === 11){
+                days = 30;
+              }
+          if (this.month == 2){
+            days = 28;
+            if (this.year % 4 === 0){
+              days = 29;
+            }
+          }
+          return days;
+        },
+        yearsForYear: function() {
+          return 100;
+        }
+      }
+    })
+  </script>
+  <script>
+    if('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    };
+  </script>
+</html>

@@ -1,0 +1,251 @@
+:root{
+    --backgroundColor:#FFF;
+    --foregroundColor:#000;
+    --bgGray:#EFEFEF;
+    --cake:#ffe1d9;
+    --icing:#FFF;
+    --detail:#cc584c;
+    --bg:#40e0d0;
+    --icingHeight: 50px;
+}
+@media (prefers-color-scheme: dark) {
+    :root{
+        --backgroundColor:#000;
+        --foregroundColor:#FFF;
+        --bgGray:#333;
+        --cake: orange;
+        --icing: brown;
+        --bg:#09211f;
+    }
+}
+html,
+body{
+    margin:0;
+    padding:0;
+    background-color:var(--bg)  
+}
+#myapp{
+    background-color:var(--bg)
+}
+body{
+    box-sizing: border-box;
+    background-color:var(--backgroundColor);
+    color:var(--foregroundColor);
+    font-family: sans-serif;
+}
+#modal--backdrop{
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(0,0,0,.5);
+    display: flex;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+#modal--content{
+    background-color:var(--backgroundColor);
+    padding: 1rem;
+    position: relative;
+    padding-top: 3rem;
+    max-width: 30rem;
+    width: 80%;
+    border: 2px solid var(--foregroundColor);
+    border-radius: .5rem;
+}
+#closeButton{
+    position: absolute;
+    top:0;
+    right:0;
+    border:none;
+    background-color:transparent;
+    color: var(--foregroundColor);
+    min-width:3rem;
+    height:3rem;
+}
+main,
+footer{
+    margin: auto;
+    padding: 0 .5rem;
+    max-width:50rem;
+}
+main{
+    padding-top:10px;
+}
+input,
+select{
+    border-width:0 0 2px 0;
+    border-color:var(--foregroundColor);
+    background-color:transparent;
+    display: block;
+    width: 100%;
+    margin-bottom: 1.5rem;
+    color: var(--foregroundColor);
+    padding-left:.5rem;
+}
+select option{
+    padding:0;
+    -moz-padding-start: 0 !important;
+}
+label,
+input,
+select{
+    font-size: 1rem;
+}
+label span{
+    margin-bottom:.5rem;
+    display: block;
+}
+button{
+    color: var(--foregroundColor);
+    background-color: var(--backgroundColor);
+    padding: .5rem;
+    border-radius: 1000px;
+    border: 3px solid var(--foregroundColor);
+    border-bottom-width: 5px;
+    min-width: 5rem;
+}
+button:not(#closeButton):active {
+    margin-top:2px;
+    border-bottom-width:3px;
+}
+.user{
+    margin: auto;
+    margin-bottom:1rem;
+    --largeCopySize: 1.5rem;
+    color: var(--foregroundColor);
+
+    /* border-radius: 20px 20px 0px 0px; */
+    margin: 0 auto 0 auto;
+    /*
+	background-image: 
+		linear-gradient(transparent 40%, #E6C197 40%),
+		linear-gradient(transparent 35%, #542F04 35%);
+    background-size: 50px 50px;
+    */
+	background-color: var(--cake);
+	border: 10px solid var(--icing);
+    box-shadow: 0 2px 10px black;
+    padding-top:var(--icingHeight);
+    position: relative;
+    border-radius: 10px 10px 0px 0px;
+}
+.user:before {
+	content: '';
+  position: absolute;
+  width: inherit;
+  height: var(--icingHeight);
+  /* border-radius: 8px 8px 0 0; */
+  background-size: 50px 60px;
+  background-image: 
+  	radial-gradient(circle at 25px 15px, var(--icing) 30px, transparent 0px), 
+  	radial-gradient(circle at 25px 20px, rgba(0, 0, 0, 0.3) 30px, transparent 0px);
+  background-repeat: repeat;
+  /* need som calc here? */
+  width:75%;
+  width:calc(100% + 20px);
+  left:-10px;
+  top:0;
+}
+.user.soon{
+    --largeCopySize: 2rem;
+    width:90%;
+}
+.user.today,
+.user.soon + .user.soon,
+.user.today + .user.today {
+    border-radius: 0;
+}
+.user.today{
+    --largeCopySize: 2.25rem;
+    text-align: center;
+    font-size:var(--largeCopySize);
+    display: block;
+    width:80%;
+}
+.user > span{
+    padding:.5rem;
+}
+span.name {
+    grid-area: name;
+    font-size:var(--largeCopySize);
+    text-transform: capitalize;
+    padding-bottom: 0;
+}
+span.count{
+    grid-area: count;
+    font-size: var(--largeCopySize);
+    text-align: center;
+    padding-bottom: 0;
+}
+span.days {
+    grid-area: days;
+    text-align: center;
+    padding-top: 0;
+}
+span.upcomingAge {
+    grid-area: upcomingAge;
+    padding-top: 0;
+}
+.user {
+    display: grid;
+    grid-template-columns: 1fr 4rem;
+    grid-template-rows: auto;
+    grid-template-areas: 
+    "name count"
+    "upcomingAge days";
+}
+#addNewButton{
+    position: sticky;
+    bottom:0;
+}
+footer{
+    text-align: right;
+}
+.table{
+    position: relative;
+    padding:.5rem;
+    background-color: #66401e;
+    border-top: 10px solid #99602d;
+}
+.user.today{
+    margin-top:7rem;
+}
+.candles{
+    position: absolute;
+    top: -5rem;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.candle{
+    font-size: 5rem;
+    font-weight: bold;
+    color: var(--icing);
+    -webkit-text-stroke: 5px var(--detail);
+    position: relative;
+}
+.candle:after{
+    content:"";
+    display: block;
+    position: absolute;
+    top:-1rem;
+    left:1rem;
+    width:2rem;
+    height:2rem;
+    border-radius: 2rem 0rem 2rem 2rem;
+    transform: rotateZ(-45deg) rotateX(-50deg) rotateY(30deg);
+    background-color:orange;
+}
+.candle::before{
+    content:"";
+    display: block;
+    position: absolute;
+    top: .5rem;
+    left: 2rem;
+    width:.25rem;
+    height:1rem;
+    background-color:black;
+}
